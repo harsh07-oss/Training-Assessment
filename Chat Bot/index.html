@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>crud Gemini</title>
+    <style>
+        :root {
+            --bg-top: #ffffff;
+            --bg-bottom: #f8f5f1;
+            --card: rgba(255, 255, 255, 0.96);
+            --text: #111111;
+            --muted: #2a2a2a;
+            --accent: #d26a2d;
+            --accent-dark: #9f4418;
+            --line: rgba(17, 17, 17, 0.18);
+            --shadow: 0 24px 60px rgba(75, 57, 43, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(210, 106, 45, 0.08), transparent 26%),
+                radial-gradient(circle at right center, rgba(160, 120, 92, 0.06), transparent 24%),
+                linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+        }
+
+        .container {
+            width: min(760px, 100%);
+            padding: 32px;
+            border-radius: 28px;
+            background: var(--card);
+            border: 1px solid rgba(17, 17, 17, 0.16);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2.2rem, 6vw, 4rem);
+            line-height: 1;
+            letter-spacing: -0.04em;
+        }
+
+        p {
+            margin: 0 0 10px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        form {
+            margin-top: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            background: #ffffff;
+            font: inherit;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: rgba(218, 107, 31, 0.55);
+            box-shadow: 0 0 0 4px rgba(218, 107, 31, 0.12);
+            transform: translateY(-1px);
+        }
+
+        button {
+            margin-top: 14px;
+            padding: 13px 22px;
+            border: 0;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: #fff9f2;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(165, 66, 18, 0.24);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 36px rgba(165, 66, 18, 0.28);
+        }
+
+        #result {
+            margin-top: 22px;
+            min-height: 160px;
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, #ffffff, #fbf9f7);
+            color: var(--text);
+            line-height: 1.75;
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> Chatbot : Modi ji</h1>
+        <p>Try messages like: "give me a motivational speech for students" or "reply like a confident national leader".</p>
+
+        <form id="chat-form">
+            <label for="message">Enter your message:</label>
+            <input type="text" id="message" name="message">
+            <button type="submit">Send</button>
+        </form>
+        <p id="result"></p>
+    </div>
+    <script
+        const API_KEY = ;
+        const PERSONALITY_PROMPT = "Respond like a confident, formal, optimistic public leader. Use respectful language, strong encouragement, and a collective tone focused on progress and service. Do not claim to be any real person and do not imitate any specific individual or signature catchphrases.";
+        const form = document.getElementById("chat-form");
+        const messageInput = document.getElementById("message");
+        const result = document.getElementById("result");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const userText = messageInput.value.trim();
+
+            if (!userText) {
+                result.textContent = "Please enter a message.";
+                return;
+            }
+
+            result.textContent = "Loading...";
+
+            try {
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    parts: [{ text: `${PERSONALITY_PROMPT}\n\nUser message: ${userText}` }],
+                                },
+                            ],
+                        }),
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || "Request failed.");
+                }
+
+                const reply =
+                    data.candidates?.[0]?.content?.parts?.[0]?.text ||
+                    "No response received.";
+
+                result.textContent = reply;
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html></html>
